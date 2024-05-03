@@ -42,6 +42,106 @@ move()는 좌측값 레퍼런스로 캐스트해주기만 함
 
 | 클래스에 소멸자, 복제 생성자, 이동 생성자, 복제 대입 연산자, 이동 대입 연사자 등과 같은 특수 멤버 함수를 하나 이상 선언했다면 일반적으로 이들 모두를 선언해야 함. 이를 5의 법칙이라 부름. 또한 이들 모두를 구현하거나 =default나 =delete로 명시적으로 디폴트로 만들거나 삭제해야 함
 
+### std::excahnge()
+
 <utility>에 정의된 std::excahnge()는 기존 값을 새 값으로 교체한 후 기존 값을 리턴
 이동 대입 연산자를 구현할 때 유용
 
+### 갹체 데이터 멤버 이동하기
+
+데이터 멤버가 객체일 때는 std::move()로 이동시켜야 함
+
+vector는 객체를 추가할 때마다 동적으로 커짐
+실행 중에 필요한 만큼 메모리를 추가로 할당해서 여기에 기존 vector에 있던 객체를 복제하거나 이동하기 때문
+이떄 이동 생성자가 정의되어 있으면 컴파일러는 해당 객체를 복제하지 않고 이동시킴
+
+## 이동 의미론으로 swap 함수 구현하기
+
+    template <typename T>
+    void swapMove(T&a, T& b)
+    {
+        T temp { std::move(a) };
+        a = std::move(b);
+        b = std::move(temp);
+    }
+
+## return 문에서 std::move() 사용하기
+return object; 형식의 문장은 주어진 object가 로컬 변수거나, 함수에 대한 매개변수거나, 임싯값이라면 우측값 표현식으로 취급하면서 리턴값 최적화(return value optimization, RVO)가 적용
+object가 로컬 변수일 때 이름 있는 리턴값 최적화(named return value optimization, NRVO)가 적용
+RVO와 NRVO 둘 다 일종의 복제 생략으로서 함수에서 객체를 리턴하는 과정을 굉장히 효율적으로 처리
+복제 생략을 적용하면 컴파일러는 함수에서 리턴하는 객체를 복제하거나 이동시킬 필요가 없음
+이를 통해 영복제 값 전달 의미론(zero-copy pass-by-value semantics)을 구현할 수 있음
+
+객체를 리턴하는데 std::move()를 사용하면 컴파일러는 RVO나 NRVO를 적용하지 않음
+return object; 형식의 문장에만 적용되는 것이기 때문
+객체가 이동 의미론을 지원할 경우에는 RVO 또는 NRVO의 차선책으로 이동 의미론을 적용하고, 그렇지 않으면 복제 의미론을 적용하는데 이렇게 되면 성능에 큰 타격을 입음
+
+| 함수에서 로컬 변수나 매개변수를 리턴할 때는 std::move()를 사용하지 말고 그냥 return object;로 작성
+
+RVO나 NRVO는 로컬 변수나 함수 매개변수에만 적용
+따라서 객체의 데이터 멤버를 리턴할 때는 RVO나 NRVO가 적용되지 않음
+
+    return condition ? object1 : object2;
+
+return object; 형식의 문장은 아니므로 복제 생성자를 이용하여 하나를 리턴
+
+RVO나 NRVO를 적용할 수 있는 컴파일러에 맞기 고쳐 쓰면 다음과 같음
+
+    if (condition)
+    {
+        return object;
+    }
+    else
+    {
+        return ojbect2;
+    }
+
+조건 연산자를 꼭 써야 한다면 다음과 같이 작성할 수 있지만 이 때는 RVO나 NRVO가 적용되지 않고 이동 의미론이나 복제 의미론만 적용되는 사실을 명심
+
+    return condition ? std::move(object1) : std::move(object2);
+
+## 함수에 인수를 전달하는 최적의 방법
+
+함수 매개변수가 기본 타입이 아닐 경우에는 함수로 전달하는 인수가 불필요하게 복제되지 않도록 const 레퍼런스를 사용
+하지만 우측값이 섞인 경우에는 좀 다름
+
+    class DataHolder
+    {
+        public:
+            void setData(const std::vector<int>& data) { m_data = data; }
+            void setData(std::vector<int>&& data) { m_data = std::move(data); }
+        private:
+            std::vector<int> m_data;
+    };
+
+setData()에 임싯값을 주고 호출하면 복제가 발생하지 않고 데이터를 이동
+
+다음 코드는 const 레퍼런스 버전의 setData()를 호출, 따라서 데이터가 복제
+
+    DataHolder wrapper;
+    std::vector myData {11, 22, 33};
+    wrapper.setData(myData);
+
+setData()에 임싯값을 주고 호출하면 우측값 레퍼런스 버전이 호출
+
+    wrapper.setData({22, 33, 44});
+
+이런식으로 우측값과 좌측값 둘 다에 대해 setData()를 최적화하려면 오버로드 버전을 두 개 만들어야 함
+복제되지 않을 매개변수에 대해서는 여전히 const 레퍼런스로 전달해야 함
+값 전달 방식은 함수 안에서 어차피 복제하게 될 매개변수에만 적합함
+이럴 때는 값 전달 방식을 적용하는 것이 좌측값과 우측값 모두에 대해 가장 효율적
+좌측값이 전달되면 const 레퍼런스 매개변수와 마찬가지로 단 한번만 복제됨
+또한 우측값이 전달될 경우에는 우측값 레퍼런스 매개변수처럼 복제가 전혀 발생하지 않는다
+
+    class DataHolder
+    {
+        public:
+            void setData(std::vector<int> data) { m_data = std::move(data); }
+        private:
+            std::vector<int> m_data;
+    }
+
+    setData()에 좌측값이 전달되면 data 매개변수로 복제된 후 m_data로 이동
+    setData()에 우측값이 전달되면 data 매개변수로 이동한 후 다시 m_data로 이동
+
+| 내부적으로 복제하는 함수에 대해서는 매개변수들 값 전달 방식으로 처리하지만 해당 매개변수는 이동 의미론을 지원하는 경우에만 그렇게 함. 나머지 경우는 const 레퍼런스 매개변수를 사용
