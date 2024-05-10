@@ -28,3 +28,29 @@ C++표준에서는 함수 문맥에 유용하게 사용할 수 있는 표준 어
 그런 함수에 [[nodiscard]] 어트리뷰트를 붙이면 에러 코드를 무시하지 않음
 
 일반적으로 [[nodiscard]] 어트리뷰트는 클래스, 함수, 열거형에 적용할 수 있음
+
+## [[maybe_unused]]
+
+뭔가 사용하지 않았을 때 컴파일러가 경고 메시지를 출력하지 않도록 설정하는데 사용
+
+    int func(int param1, int param2)
+    {
+        return 42;
+    }
+
+컴파일러 경고 수준을 높게 설정하고 위와 같이 함수를 정의하면 두 가지 컴파일 경고를 출력
+
+> warning C4100: 'param2': unreferenced formal parameter
+> warning C4100: 'param1': unreferenced formal parameter
+
+이 때 다음과 같이 [[maybe_unused]] 어트리뷰트를 지정할 수 있음
+
+    int func(int param1, [[maybe_unused]] int param2)
+    {
+        return 42;
+    }
+
+어트리뷰트가 지정된 두 번째 매개변수에 대해서는 경고 메시지를 출력하지 않고, param1에 대한 경고만 출력
+> warning C4100: 'param1': unreferenced formal parameter
+
+클래스, 구조체, 비 static 데이터 멤버, 유니온, typedef, 타입 앨리어스, 변수, 함수, 열거형, 열것값 등에 대해 지정할 수 있음
