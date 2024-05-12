@@ -53,4 +53,46 @@ C++표준에서는 함수 문맥에 유용하게 사용할 수 있는 표준 어
 어트리뷰트가 지정된 두 번째 매개변수에 대해서는 경고 메시지를 출력하지 않고, param1에 대한 경고만 출력
 > warning C4100: 'param1': unreferenced formal parameter
 
-클래스, 구조체, 비 static 데이터 멤버, 유니온, typedef, 타입 앨리어스, 변수, 함수, 열거형, 열것값 등에 대해 지정할 수 있음
+클래스, 구조체, 비 static 데이터 멤버, 유니온, typedef, 타입 앨리어스, 변수, 함수, 열거형, 열것값 등에 대해 지정할ㅍ> warning C4100: 'param1': unreferenced formal parameter 수 있음
+
+## [[noreturn]]
+
+함수에 [[noreturn]] 어트리뷰트를 지정하면 호출 지점으로 다시 돌아가지 않음
+주로 프로세스나 스레드 종료와 같이 뭔가가 끝나게 만들거나, 익셉션을 던지는 함수가 여기에 해당함
+이 어트리뷰트를 이용하면 컴파일러가 특정한 경고나 에러 메시지를 출력하지 않게 만들 수 있음
+
+    [[noreturn]] void forceProgramTermination()
+    {
+        std::exit(1); // <cstdlib>에 정의됨
+    }
+
+    bool isDongleAvailable()
+    {
+        bool isAvailable { false };
+        // 라이선싱 동글을 사용할 수 있는지 확인
+        return isAvailable;
+    }
+
+    bool isFeatureLicensed(int featureId)
+    {
+        if (!isDongleAvailable())
+        {
+            // 사용 가능한 라이선싱 동글이 없다면 프로그램을 중단한다.
+            forceProgramTermination();
+        }
+        else
+        {
+            bool isLicensed { featureId == 42 };
+            // 동글이 있다면 주어진 기능에 대한 라이선스 검사를 한다.
+            return isLicensed;
+        }
+    }
+
+    int main()
+    {
+        bool isLicensed { isFeatureLicensed(42) };
+    }
+
+이 코드를 컴파일하면 아무런 경고나 에러 메시지가 출력되지 않음
+[[noreturn]] 어트리뷰트를 제거하고 컴파일하면 다음과 같은 경고를 출력
+> warning C4715: 'isFeatureLicensed': not all control paths return a value
