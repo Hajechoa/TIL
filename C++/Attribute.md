@@ -57,8 +57,8 @@ C++표준에서는 함수 문맥에 유용하게 사용할 수 있는 표준 어
 
 ## [[noreturn]]
 
-함수에 [[noreturn]] 어트리뷰트를 지정하면 호출 지점으로 다시 돌아가지 않음
-주로 프로세스나 스레드 종료와 같이 뭔가가 끝나게 만들거나, 익셉션을 던지는 함수가 여기에 해당함
+함수에 [[noreturn]] 어트리뷰트를 지정하면 호출 지점으로 다시 돌아가지 않음  
+주로 프로세스나 스레드 종료와 같이 뭔가가 끝나게 만들거나, 익셉션을 던지는 함수가 여기에 해당함     
 이 어트리뷰트를 이용하면 컴파일러가 특정한 경고나 에러 메시지를 출력하지 않게 만들 수 있음
 
     [[noreturn]] void forceProgramTermination()
@@ -93,6 +93,16 @@ C++표준에서는 함수 문맥에 유용하게 사용할 수 있는 표준 어
         bool isLicensed { isFeatureLicensed(42) };
     }
 
-이 코드를 컴파일하면 아무런 경고나 에러 메시지가 출력되지 않음
+이 코드를 컴파일하면 아무런 경고나 에러 메시지가 출력되지 않음  
 [[noreturn]] 어트리뷰트를 제거하고 컴파일하면 다음과 같은 경고를 출력
 > warning C4715: 'isFeatureLicensed': not all control paths return a value
+
+## [[deprecated]]
+
+지원 중단된 대상임을 지정하는데 사용    
+현재 사용할 수는 있지만 권장하지 않는 대상임을 표시     
+지원 중단된 이유를 표현하는 인수를 옵션으로 지정할 수 있음  
+
+    [[deprecated("Unsafe method, plesae use xyz")]] void func();
+
+> warning: 'void func()' is deprecated: unsafe method, please use xyz
