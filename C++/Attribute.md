@@ -106,3 +106,27 @@ C++표준에서는 함수 문맥에 유용하게 사용할 수 있는 표준 어
     [[deprecated("Unsafe method, plesae use xyz")]] void func();
 
 > warning: 'void func()' is deprecated: unsafe method, please use xyz
+
+## [[likely]]와 [[unlikely]]
+
+컴파일러가 최적화 작업을 수행하는데 도움을 줄 수 있음   
+예를 들어 이 어트리뷰트를 이용하여 if와 switch 문에서 수행될 가능성이 높은 브랜치를 표시할 수 있음  
+하지만 이 어트리뷰트가 필요한 경우는 드뭄   
+최신 컴파일러와 하드웨어는 브랜치 예측 능력이 상당히 뛰어나기 때문에 이런 어트리뷰트를 지정하지 않아도 알아서 잘 처리하지만, 성능에 민감한 부분 등과 같이 특정한 경우에는 컴파일러에 도음을 줄 수 있음
+
+    int value { /* ... */ };
+    if (value > 11) [[unlikely]] { /* 필요한 작업을 수행한다. */ }
+    else { /* 필요한 작업을 수행한다. */ }
+
+    switch (value)
+    {
+        [[likely]] case 1:
+            // 필요한 작업을 수행한다.
+            break;
+        case 2:
+            // 필요한 작업을 수행한다.
+            break;
+        [[unlikely]] case 12:
+            // 필요한 작업을 수행한다.
+            break;
+    }
