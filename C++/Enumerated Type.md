@@ -69,7 +69,7 @@ enum class로 정의한 열거한 타입 값의 스코프는 자동으로 확장
 
 하지만 열거값을 길게 풀어 쓰거나 using enum 또는 using 선언문을 적어줘야함
 
-# C++20
+## C++20
 
 C++20부터는 using enum으로 선언하면 열것값을 길게 풀어 쓰지 않아도 됨
 
@@ -85,3 +85,34 @@ C++20부터는 using enum으로 선언하면 열것값을 길게 풀어 쓰지 �
 > C++20부터 열것값을 짧게 쓰도록 지원하지만 이 기능은 조심해서 사용해야 함
 > 사용하더라도 using enum 또는 using 선언문의 스코프를 최소화하기 바람
 > 스코프가 너무 크면 이름이 충돌하는 현상이 발생할 수 있음
+
+## 예전 방식의 열거 타입
+
+새로운 버전에 맞게 코드를 작성할 때는 앞 절에서 소개한 강타입 열거를 사용해야 함    
+하지만 예전에 작성된 레거시 코드에서는 enum class가 아닌 enum으로 선언된 것을 알 수 있음    
+다음 PieceType을 예전 방식으로 작성한 것    
+
+    enum PieceType { PieceTypeKing, PieceTypeQueen, PieceTypeRook, PieceTypePawn };
+
+이런 예전 방식 열거 타입의 값은 스코프가 자동으로 확장  
+다시 말해 상위 스코프에서 열거 타입 멤버의 이름을 그대로 사용할 수 있음 
+
+    PieceType myPiece { PieceTypeQueen };
+
+이렇게 되면 다음과 같이 상위 스코프에 같은 이름이 있으면 컴파일 에러가 발생 
+
+    bool ok { false };
+    enum Status { error, ok };
+
+여기서 ok란 이름을 부울 타입 변수로 정의한 뒤 같은 이름을 Status 열거 타입의 멤버로 정의 했음   
+컴파일하면 다음과 같은 에러 메시지가 출력   
+
+    error C2365: 'ok': redefinition; previous definition was 'data variable'
+
+따라서 예전 방식으로 열거 타입을 정의할 때는 멤버 이름을 고유한 이름으로 지정해야 함    
+예를 들어 그냥 Queen이라 하지 말고 PieceTypeQueen과 같이 지정해야 함    
+
+이처럼 예전 방식의 열거 타입은 강타입이 아니기 때문에 타입에 안전하지 않음  
+값이 항상 정수로 해석되기 때문에 본의 아니게 열것값을 전혀 다른 열거 타입과 비교할 수도 있고, 함수를 호출할 때 엉뚱한 열거 타입 값을 전달하는 오류가 발생할 수 있음
+
+> 열거 타입을 사용할 때는 타입에 안전하지 않은, 즉 타입 언세이프(type-unsafe)한 예전 방식의 enum보다는 강타입 버전인 enum class로 작성하는 것이 좋다.
