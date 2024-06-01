@@ -50,3 +50,49 @@ auto는 레퍼런스와 const를 제거하기 때문에 다음에 나오는 resu
     auto result { as_count(str) };
 
 > auto를 지정하면 레퍼런스와 const 지정자가 사라져서 값이 복제된다는 점에 주의한다. 복제 방식으로 전달되지 않게 하려면 auto&나 const auto&로 지정한다.
+
+## auto*
+
+auto 키워드는 포인터에도 적용할 수 있음
+
+    int i { 123 };
+    auto p { &i };
+
+p의 타입은 int. 여기에서는 앞에 본 레퍼런스와 달리 복제가 되어버리는 경우가 발생하지 않음.  
+하지만 포인터를 다룰 때는 auto* 구문을 사용하는 것이 바람직함   
+대상이 포인터임을 명시적으로 드러내기 때문
+
+    auto* p { &i };
+
+또한 그냥 auto를 사용하지 않고 auto*를 사용하면 auto, const 그리고 포인터를 함께 쓸 때 발생하는 이상한 동작도 방지할 수 있음
+
+    const auto p1 { &i };
+
+이렇게 하면 대부분의 경우 의도와 다르게 작동할 것
+
+일반적으로 포인터가 가리키는 대상을 보호해야하는 경우 const를 사용  
+여기서 p1이 const int*라고 생각하겠지만 사실은 int* const   
+즉, 비 const 정수에 대한 const 포인터인 것  
+
+다음과 같이 const를 auto 뒤에 붙이면 아무런 소용이 없음     
+여전히 int* const 타입
+
+    auto const p2 { &i };
+
+auto*와 const를 함께 쓰면 의도한 대로 작동
+
+    const auto* p3 { &i };
+
+이렇게 하면 p3의 타입은 const int*가 됨     
+const int 대신 const 포인터를 꼭 써야 한다면 const를 끝에 붙임
+
+    auto* const p4 {&i };
+
+여기서 p4의 타입은 int* const가 됨
+
+지금까지 살펴본 구문을 활용하면 const 포인터와 const int를 동시에 만들 수 있음
+
+    const auto* const p5 { &i };
+
+여기서 p5의 타입은 const int* const
+여기서 *를 생략하면 이 작업을 수행 할 수 없음
