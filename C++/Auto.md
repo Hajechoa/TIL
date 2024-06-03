@@ -96,3 +96,37 @@ const int 대신 const 포인터를 꼭 써야 한다면 const를 끝에 붙임
 
 여기서 p5의 타입은 const int* const
 여기서 *를 생략하면 이 작업을 수행 할 수 없음
+
+## 복제 리스트 초기화와 직접 리스트 초기화
+
+초기화 구문은 다음 두 가지가 있으며, 초기자 리스트를 중괄호로 묶어서 표현
+
+* 복재 리스트 초기화: T obj = { arg1, arg2, ... };
+* 직접 리스트 초기화: T obj { arg1, arg2, ... };
+
+C++17부터는 auto 타입 추론 기능과 관련하여 복제 리스트 초기화와 직접 리스트 초기화의 차이가 커짐
+
+C++17부터는 다음과 같음
+
+    // 복제 리스트 초기화
+    auto a = { 11 };        // intializer_list<int>
+    auto b = { 11, 22 };    // intializer_list<int>
+
+    // 직접 리스트 초기화
+    auto c { 11 };          // int
+    auto d { 11, 22};       // Error, too many elements
+
+이때 복제 리스트 초기화에서 중괄호 안에 나온 원소는 반드시 타입이 모두 같아야 함
+예를 들어 다음과 같이 작성하면 컴파일 에러가 발생
+
+    auto b = { 11, 22.33 }; // 컴파일 에러
+
+이전 버전(C++11/14)에서는 복제 리스트 초기화와 직접 리스트 초기화 둘 다 intializer_list<>로 처리 했음
+
+    // 복제 리스트 초기화
+    auto a = { 11 };        // intializer_list<int>
+    auto b = { 11, 22 };    // intializer_list<int>
+
+    // 직접 리스트 초기화
+    auto c { 11 };          // intializer_list<int>
+    auto d { 11, 22};       // intializer_list<int>
