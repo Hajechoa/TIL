@@ -128,3 +128,27 @@ unique_ptr을 사용할 때도 이런 문제가 발생할 수 있음
 shared_ptr에 대한 캐스팅을 지원하는 함수로 const_pointer_cast(), dynamic_pointer_cast(), static_pointer_cast(), reinterpret_pointer_cast()가 있음   
 이 함수들은 일반 캐스팅 함수인 const_cast(), dynamic_cast(), static_cast(), reinterpret_cast()와 작동 방식이 비슷함     
 참고로 이 캐스팅 함수는 shared_ptr에만 적용되고, unique_ptr에는 사용할 수 없음  
+
+## 앨리어싱
+
+shared_ptr은 앨리어싱을 지원함  
+즉, 한 포인터(소유한 포인터)를 다른 shared_ptr과 공유하면서 다른 객체(저장된 포인터)를 가리킬 수 있음   
+예를 들어 shared_ptr이 어떤 객체를 소유하는 동시에 그 객체의 멤버도 가리키게 할 수 있음 
+코드로 표현하면 다음과 같음     
+
+    class foo
+    {
+        public:
+            foo(int value) : m_data { value } {}
+            int m_data;
+    };
+
+    auto foo { make_shared<foo>(42) };
+    auto aliasing { shared_ptr<int> { foo, &foo->m_data } };
+
+여기서 두 shared_ptr(foo와 aliasing)이 모두 삭제될 때만 Foo 객체가 삭제됨   
+
+소유한 포인터는 레퍼런스 카운팅에 사용되지만, 저장된 포인터는 역참조하거나 get()을 호출하면 리턴됨  
+저장된 포인터는 비교 연산을 비롯한 대부분의 연산에 적용할 수 있음   
+
+> 모던 C++에서는 소유권과 상관없는 대상에 대해서만 일반 포인터를 사용한다. 만약 소유권에 관련이 있다면 기본적으로 unique_ptr을 사용하고, 이를 공유한다면 shared_ptr을 사용한다. 또한 이런 포인터를 생성할 때는 make_unique()와 make_shared()를 사용한다. 그러므로 new와 delete 연산자를 직접 호출할 일이 없다.
