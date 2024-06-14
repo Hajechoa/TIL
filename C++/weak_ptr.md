@@ -51,3 +51,14 @@ weak_ptr을 사용하는 예는 다음과 같음
     Resource has been freed!
 
 C++17부터 weak_ptr도 shared_ptr과 마찬가지로 C 스타일 배열을 지원함
+
+## 함수에 전달하기
+
+매개변수에서 포인터를 받는 함수는 소유권을 전달하거나 공유할 경우에만 스마트 포인터를 사용해야 함   
+shared_ptr의 소유권을 공유하려면 shared_ptr을 값으로 전달받으면 됨  
+마찬가지로 unique_ptr의 소유권을 전달하려면 unique_ptr을 값으로 받으면 됨   
+후자의 경우 이동 의미론이 필요함    
+
+소유권 전달과 공유가 전혀 없다면 비 const 대상에 대한 레퍼런스나 const에 대한 레퍼런스로 매개변수를 정의해야 함     
+또는 매개변수에 nulltpr을 가지는 것이 적합하다면 일반 포인터로 정의함   
+매개변수 타입을 const shared_ptr\<T>&나 const unique_ptr\<T>&로 정의하는 것은 큰 의미가 없음  
