@@ -82,3 +82,12 @@ shared_ptr의 소유권을 공유하려면 shared_ptr을 값으로 전달받으�
         unique_ptr<Simple> mySmartPtr1 { create() };
         auto mySmartPtr2 { create() };
     }
+
+## 현재는 폐기된 auto_ptr
+
+C++11 이전에는 표준 라이브러리에서 스마트 포인터를 간단히 구현한 auto_ptr을 제공했는데, 아쉽게도 몇 가지 심각한 단점이 있었음
+그중 하나는 vector와 같은 표준 라이브러리 컨테이너 안에서는 제대로 작동하지 않는다는 점
+C++11과 C++14부터는 auto_ptr을 공식적으로 폐기했고, C++17부터 완전히 삭제되면서 그 빈자리를 unique_ptr과 shared_ptr이 대체했음
+여기서 auto_ptr을 소개하는 이유는 이를 절대로 사용하면 안 된다는 것을 강조하기 위해서
+
+> 기존에 제공되던 스마트 포인터인 auto_ptr을 사용하지 말고 unique_ptr이나 shared_ptr을 사용한다.
